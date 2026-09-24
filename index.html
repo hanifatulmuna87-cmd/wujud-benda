@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VLab Wujud Zat - Media Pembelajaran Kelas IV SD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0fdf4;
+            color: #1e293b;
+        }
+        h1, h2, h3, .font-fredoka {
+            font-family: 'Fredoka', cursive;
+        }
+        .btn-bounce {
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .btn-bounce:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .btn-bounce:active {
+            transform: translateY(1px) scale(0.98);
+        }
+        .card-custom {
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+        }
+        .drop-zone-active {
+            border-color: #3b82f6 !important;
+            background-color: #eff6ff !important;
+        }
+        /* Molecule particle animations */
+        @keyframes float-gas {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(15px, -20px); }
+        }
+        @keyframes liquid-flow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(5px); }
+        }
+        @keyframes solid-vibrate {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(1px, 1px); }
+            75% { transform: translate(-1px, -1px); }
+        }
+        .animate-gas { animation: float-gas 2s infinite ease-in-out; }
+        .animate-liquid { animation: liquid-flow 1.5s infinite ease-in-out; }
+        .animate-solid { animation: solid-vibrate 0.3s infinite ease-in-out; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-800">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-white border-b-4 border-emerald-400 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="navigateTo('dashboard')">
+                <div class="w-10 h-10 bg-emerald-500 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-md">
+                    🧪
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-emerald-600 leading-tight">VLab Wujud Zat</h1>
+                    <p class="text-xs text-slate-500 font-semibold">Sains Kelas IV SD/MI</p>
+                </div>
+            </div>
+            
+            <!-- User Info Bar -->
+            <div id="userInfoHeader" class="hidden flex items-center gap-3 bg-emerald-50 px-4 py-2 rounded-2xl border border-emerald-200">
+                <div class="text-right">
+                    <p id="headerStudentName" class="font-bold text-emerald-800 text-sm md:text-base">Siswa</p>
+                    <p id="headerStudentClass" class="text-xs text-emerald-600">Kelas 4</p>
+                </div>
+                <button onclick="logout()" class="text-xs bg-rose-100 hover:bg-rose-200 text-rose-600 font-bold py-1 px-3 rounded-xl transition">
+                    Keluar
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content App View Container -->
+    <main class="flex-grow max-w-6xl w-full mx-auto p-4 md:p-6 flex flex-col justify-center">
+
+        <!-- 1. LOGIN PAGE -->
+        <section id="pageLogin" class="page-view max-w-md mx-auto w-full">
+            <div class="bg-white card-custom p-6 md:p-8 border-2 border-emerald-100 text-center">
+                <div class="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 text-5xl shadow-inner animate-bounce">
+                    🧊
+                </div>
+                <h2 class="text-2xl font-bold text-emerald-700 mb-2">Selamat Datang!</h2>
+                <p class="text-slate-600 text-sm mb-6">Ayo jelajahi dunia sains wujud zat dan perubahannya bersama VLab Interaktif!</p>
+
+                <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4 text-left">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">Nama Lengkap Kamu:</label>
+                        <input type="text" id="inputName" required placeholder="Contoh: Budi Santoso"
+                            class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-500 focus:ring-0 outline-none font-semibold text-slate-700">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">Kelas:</label>
+                        <select id="inputClass" required
+                            class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-500 focus:ring-0 outline-none font-semibold text-slate-700">
+                            <option value="IV A">Kelas IV A</option>
+                            <option value="IV B">Kelas IV B</option>
+                            <option value="IV C">Kelas IV C</option>
+                        </select>
+                    </div>
+                    <button type="submit"
+                        class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-xl text-lg btn-bounce shadow-lg shadow-emerald-200 flex items-center justify-center gap-2">
+                        🚀 Mulai Petualangan
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- 2. DASHBOARD PAGE -->
+        <section id="pageDashboard" class="page-view hidden">
+            <div class="mb-6 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-3xl p-6 text-white shadow-md relative overflow-hidden">
+                <div class="relative z-10">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-1">Halo, <span id="dashStudentName">Siswa</span>! 👋</h2>
+                    <p class="text-emerald-100 text-sm md:text-base">Pilih menu belajar atau simulasi laboratorium di bawah ini!</p>
+                </div>
+                <div class="absolute -right-4 -bottom-10 text-8xl opacity-20 select-none">🔬</div>
+            </div>
+
+            <!-- Menu Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                <!-- Menu 1: Materi -->
+                <div onclick="navigateTo('materi')" class="bg-white card-custom p-5 border-2 border-sky-100 hover:border-sky-400 cursor-pointer btn-bounce flex flex-col items-center text-center group">
+                    <div class="w-16 h-16 bg-sky-100 rounded-2xl flex items-center justify-center text-3xl mb-3 group-hover:scale-110 transition">
+                        📚
+                    </div>
+                    <h3 class="text-lg font-bold text-sky-700 mb-1">1. Modul Materi</h3>
+                    <p class="text-xs text-slate-500">Pelajari 3 wujud zat dan sifat-sifat uniknya.</p>
+                </div>
+
+                <!-- Menu 2: Game Drag & Drop -->
+                <div onclick="navigateTo('game')" class="bg-white card-custom p-5 border-2 border-amber-100 hover:border-amber-400 cursor-pointer btn-bounce flex flex-col items-center text-center group">
+                    <div class="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center text-3xl mb-3 group-hover:scale-110 transition">
+                        🎮
+                    </div>
+                    <h3 class="text-lg font-bold text-amber-700 mb-1">2. Game Kelompok</h3>
+                    <p class="text-xs text-slate-500">Uji kemampuan memilah benda Padat, Cair, dan Gas.</p>
+                </div>
+
+                <!-- Menu 3: VLab Simulasi -->
+                <div onclick="navigateTo('vlab')" class="bg-white card-custom p-5 border-2 border-purple-100 hover:border-purple-400 cursor-pointer btn-bounce flex flex-col items-center text-center group">
+                    <div class="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center text-3xl mb-3 group-hover:scale-110 transition">
+                        🔬
+                    </div>
+                    <h3 class="text-lg font-bold text-purple-700 mb-1">3. Simulasi VLab</h3>
+                    <p class="text-xs text-slate-500">Eksperimen suhu & amati perubahan wujud zat!</p>
+                </div>
+
+                <!-- Menu 4: Kuis & Hasil -->
+                <div onclick="navigateTo('kuis')" class="bg-white card-custom p-5 border-2 border-rose-100 hover:border-rose-400 cursor-pointer btn-bounce flex flex-col items-center text-center group">
+                    <div class="w-16 h-16 bg-rose-100 rounded-2xl flex items-center justify-center text-3xl mb-3 group-hover:scale-110 transition">
+                        ✏️
+                    </div>
+                    <h3 class="text-lg font-bold text-rose-700 mb-1">4. Kuis & Evaluasi</h3>
+                    <p class="text-xs text-slate-500">Kerjakan 5 soal interaktif & dapatkan nilai!</p>
+                </div>
+            </div>
+
+            <!-- Quick Progress / Result Card -->
+            <div class="mt-6 bg-white card-custom p-5 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-2xl font-bold">
+                        🏆
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800">Status Belajar Kamu</h4>
+                        <p class="text-xs text-slate-500">Skor Kuis Terakhir: <span id="dashQuizScore" class="font-bold text-emerald-600">Belum Ada</span></p>
+                    </div>
+                </div>
+                <button onclick="navigateTo('hasil')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-xl text-sm transition">
+                    Lihat Hasil Lengkap ➔
+                </button>
+            </div>
+        </section>
+
+        <!-- 3. MATERI PAGE -->
+        <section id="pageMateri" class="page-view hidden space-y-6">
+            <div class="flex justify-between items-center">
+                <button onclick="navigateTo('dashboard')" class="bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold py-2 px-4 rounded-xl text-sm flex items-center gap-2">
+                    ⬅ Kembali
+                </button>
+                <h2 class="text-xl md:text-2xl font-bold text-sky-700">📚 Modul Wujud Zat & Sifatnya</h2>
+            </div>
+
+            <!-- 3 Main States Tabs/Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Padat -->
+                <div class="bg-white card-custom p-5 border-2 border-amber-200 hover:shadow-lg transition">
+                    <div class="w-full h-32 bg-amber-50 rounded-2xl flex items-center justify-center text-6xl mb-4">
+                        🪵
+                    </div>
+                    <h3 class="text-xl font-bold text-amber-700 mb-2">1. Zat Padat</h3>
+                    <ul class="text-sm text-slate-600 space-y-2 list-disc list-inside">
+                        <li><strong>Bentuk:</strong> Tetap (tidak berubah mengikuti wadah).</li>
+                        <li><strong>Volume:</strong> Tetap.</li>
+                        <li><strong>Partikel/Molekul:</strong> Sangat rapat dan tidak bisa bergerak bebas.</li>
+                        <li><strong>Contoh:</strong> Batu, kayu, es, meja, buku.</li>
+                    </ul>
+                </div>
+
+                <!-- Cair -->
+                <div class="bg-white card-custom p-5 border-2 border-sky-200 hover:shadow-lg transition">
+                    <div class="w-full h-32 bg-sky-50 rounded-2xl flex items-center justify-center text-6xl mb-4">
+                        💧
+                    </div>
+                    <h3 class="text-xl font-bold text-sky-700 mb-2">2. Zat Cair</h3>
+                    <ul class="text-sm text-slate-600 space-y-2 list-disc list-inside">
+                        <li><strong>Bentuk:</strong> Berubah-ubah mengikuti bentuk wadahnya.</li>
+                        <li><strong>Volume:</strong> Tetap.</li>
+                        <li><strong>Partikel/Molekul:</strong> Agak renggang dan bisa bergerak/mengalir.</li>
+                        <li><strong>Contoh:</strong> Air, minyak, susu, sirup, kecap.</li>
+                    </ul>
+                </div>
+
+                <!-- Gas -->
+                <div class="bg-white card-custom p-5 border-2 border-purple-200 hover:shadow-lg transition">
+                    <div class="w-full h-32 bg-purple-50 rounded-2xl flex items-center justify-center text-6xl mb-4">
+                        🎈
+                    </div>
+                    <h3 class="text-xl font-bold text-purple-700 mb-2">3. Zat Gas</h3>
+                    <ul class="text-sm text-slate-600 space-y-2 list-disc list-inside">
+                        <li><strong>Bentuk:</strong> Berubah-ubah mengisi seluruh ruangan.</li>
+                        <li><strong>Volume:</strong> Berubah-ubah.</li>
+                        <li><strong>Partikel/Molekul:</strong> Sangat renggang dan bergerak sangat bebas.</li>
+                        <li><strong>Contoh:</strong> Udara, asap, uap air, gas LPG.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Perubahan Wujud Summary -->
+            <div class="bg-white card-custom p-6 border-2 border-emerald-100">
+                <h3 class="text-lg font-bold text-emerald-700 mb-3 flex items-center gap-2">
+                    🔄 Enam Perubahan Wujud Zat
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs md:text-sm">
+                    <div class="p-3 bg-red-50 rounded-xl border border-red-200">
+                        <span class="font-bold text-red-600">🔥 Mencair:</span> Padat ➔ Cair (Butuh Panas)
+                    </div>
+                    <div class="p-3 bg-blue-50 rounded-xl border border-blue-200">
+                        <span class="font-bold text-blue-600">❄️ Membeku:</span> Cair ➔ Padat (Didinginkan)
+                    </div>
+                    <div class="p-3 bg-orange-50 rounded-xl border border-orange-200">
+                        <span class="font-bold text-orange-600">♨️ Menguap:</span> Cair ➔ Gas (Pemanasan)
+                    </div>
+                    <div class="p-3 bg-teal-50 rounded-xl border border-teal-200">
+                        <span class="font-bold text-teal-600">🌧️ Mengembun:</span> Gas ➔ Cair (Pendinginan)
+                    </div>
+                    <div class="p-3 bg-purple-50 rounded-xl border border-purple-200">
+                        <span class="font-bold text-purple-600">✨ Menyublim:</span> Padat ➔ Gas
+                    </div>
+                    <div class="p-3 bg-indigo-50 rounded-xl border border-indigo-200">
+                        <span class="font-bold text-indigo-600">💎 Mengkristal:</span> Gas ➔ Padat
+                    </div>
+                </div>
+                <div class="mt-4 text-center">
+                    <button onclick="navigateTo('vlab')" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 px-6 rounded-xl text-sm btn-bounce shadow-md">
+                        Coba Eksperimen di VLab ➔
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. GAME DRAG & DROP PAGE -->
+        <section id="pageGame" class="page-view hidden space-y-6">
+            <div class="flex justify-between items-center">
+                <button onclick="navigateTo('dashboard')" class="bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold py-2 px-4 rounded-xl text-sm">
+                    ⬅ Kembali
+                </button>
+                <div class="text-right">
+                    <h2 class="text-xl font-bold text-amber-700">🎮 Permainan Memilah Wujud Zat</h2>
+                    <p class="text-xs text-slate-500">Tarik gambar benda ke kotak wujud yang tepat!</p>
+                </div>
+            </div>
+
+            <!-- Items Source Container -->
+            <div class="bg-amber-50 p-4 rounded-2xl border-2 border-amber-200 text-center">
+                <p class="text-sm font-bold text-amber-800 mb-3">Pilihan Benda (Tarik atau Klik):</p>
+                <div id="dragItemsContainer" class="flex flex-wrap justify-center gap-3 min-h-[70px]">
+                    <!-- Items generated by JS -->
+                </div>
+            </div>
+
+            <!-- Drop Target Zones -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Zone Padat -->
+                <div ondragover="allowDrop(event)" ondrop="handleDrop(event, 'padat')"
+                    class="drop-zone border-2 border-dashed border-amber-300 bg-white rounded-2xl p-4 text-center min-h-[220px] flex flex-col items-center">
+                    <div class="text-2xl mb-1">🪵</div>
+                    <h3 class="font-bold text-amber-700 mb-2">Benda PADAT</h3>
+                    <div id="zone-padat" class="w-full flex flex-col gap-2 flex-grow"></div>
+                </div>
+
+                <!-- Zone Cair -->
+                <div ondragover="allowDrop(event)" ondrop="handleDrop(event, 'cair')"
+                    class="drop-zone border-2 border-dashed border-sky-300 bg-white rounded-2xl p-4 text-center min-h-[220px] flex flex-col items-center">
+                    <div class="text-2xl mb-1">💧</div>
+                    <h3 class="font-bold text-sky-700 mb-2">Benda CAIR</h3>
+                    <div id="zone-cair" class="w-full flex flex-col gap-2 flex-grow"></div>
+                </div>
+
+                <!-- Zone Gas -->
+                <div ondragover="allowDrop(event)" ondrop="handleDrop(event, 'gas')"
+                    class="drop-zone border-2 border-dashed border-purple-300 bg-white rounded-2xl p-4 text-center min-h-[220px] flex flex-col items-center">
+                    <div class="text-2xl mb-1">🎈</div>
+                    <h3 class="font-bold text-purple-700 mb-2">Benda GAS</h3>
+                    <div id="zone-gas" class="w-full flex flex-col gap-2 flex-grow"></div>
+                </div>
+            </div>
+
+            <div class="text-center flex justify-center gap-3">
+                <button onclick="resetDragGame()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2.5 px-5 rounded-xl text-sm">
+                    🔄 Reset Permainan
+                </button>
+                <button onclick="checkDragGameResult()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 px-6 rounded-xl text-sm btn-bounce shadow-md">
+                    ✅ Periksa Jawaban
+                </button>
+            </div>
+        </section>
+
+        <!-- 5. VLAB SIMULASI PAGE -->
+        <section id="pageVLab" class="page-view hidden space-y-6">
+            <div class="flex justify-between items-center">
+                <button onclick="navigateTo('dashboard')" class="bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold py-2 px-4 rounded-xl text-sm">
+                    ⬅ Kembali
+                </button>
+                <div class="text-right">
+                    <h2 class="text-xl font-bold text-purple-700">🔬 Laboratorium Virtual Suhu</h2>
+                    <p class="text-xs text-slate-500">Ubah suhu air untuk melihat perubahan wujud!</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Simulation Visual Container -->
+                <div class="lg:col-span-7 bg-white card-custom p-6 border-2 border-purple-100 flex flex-col items-center">
+                    <!-- Beaker / Reaction Container -->
+                    <div class="relative w-64 h-64 bg-slate-100 rounded-b-3xl border-4 border-t-0 border-slate-300 flex items-end justify-center overflow-hidden mb-6 shadow-inner">
+                        <!-- Heat/Cold Rays Visual -->
+                        <div id="heatEffect" class="absolute inset-0 bg-red-500/10 opacity-0 transition-opacity duration-500 pointer-events-none"></div>
+                        <div id="coldEffect" class="absolute inset-0 bg-blue-500/10 opacity-0 transition-opacity duration-500 pointer-events-none"></div>
+
+                        <!-- Object State Visual -->
+                        <div id="vlabObject" class="transition-all duration-700 flex flex-col items-center justify-center">
+                            <!-- Dynamic Content Rendered by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Temperature Gauge and Controls -->
+                    <div class="w-full bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col items-center">
+                        <div class="flex items-center justify-between w-full mb-2">
+                            <span class="text-sm font-bold text-slate-600">Suhu Beaker:</span>
+                            <span id="tempDisplay" class="text-2xl font-bold text-indigo-600">0 °C</span>
+                        </div>
+                        
+                        <!-- Slider -->
+                        <input type="range" id="tempSlider" min="-10" max="110" value="0" step="5" oninput="updateVLab(this.value)"
+                            class="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-4">
+
+                        <!-- Preset Quick Buttons -->
+                        <div class="flex flex-wrap justify-center gap-2 w-full">
+                            <button onclick="setVLabTemp(-10)" class="bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs font-bold py-2 px-3 rounded-xl flex-1">
+                                ❄️ -10°C (Dingin)
+                            </button>
+                            <button onclick="setVLabTemp(25)" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-700 text-xs font-bold py-2 px-3 rounded-xl flex-1">
+                                🥛 25°C (Sedang)
+                            </button>
+                            <button onclick="setVLabTemp(100)" class="bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-bold py-2 px-3 rounded-xl flex-1">
+                                🔥 100°C (Panas)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Particle/Molecule & Analysis Side Panel -->
+                <div class="lg:col-span-5 space-y-4">
+                    <!-- Molecule Microscope View -->
+                    <div class="bg-white card-custom p-5 border-2 border-slate-200">
+                        <h3 class="text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
+                            🔍 Mikroskop Partikel Molekul
+                        </h3>
+                        <div id="moleculeBox" class="w-full h-32 bg-slate-900 rounded-xl p-3 flex flex-wrap items-center justify-center gap-2 overflow-hidden relative">
+                            <!-- Molecules rendered via JS -->
+                        </div>
+                        <p id="moleculeDesc" class="text-xs text-slate-500 mt-2 italic text-center">
+                            Partikel rapat dan diam di tempat.
+                        </p>
+                    </div>
+
+                    <!-- Analysis Question Box -->
+                    <div class="bg-indigo-50 card-custom p-5 border border-indigo-200">
+                        <h3 class="text-sm font-bold text-indigo-900 mb-2">📝 Hasil Pengamatan:</h3>
+                        <div class="space-y-2 text-xs text-indigo-950">
+                            <p><strong>Status Wujud:</strong> <span id="vlabStatusText" class="font-bold text-indigo-700">PADAT (Es Batu)</span></p>
+                            <p><strong>Proses Perubahan:</strong> <span id="vlabProcessText" class="font-bold text-indigo-700">-</span></p>
+                            <p class="mt-2 bg-white p-3 rounded-xl border border-indigo-100 text-slate-700 leading-relaxed" id="vlabExplanation">
+                                Pada suhu di bawah 0°C, air membeku menjadi es padat karena molekulnya saling mengikat erat.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. KUIS INTERAKTIF PAGE -->
+        <section id="pageKuis" class="page-view hidden max-w-2xl mx-auto w-full space-y-6">
+            <!-- Quiz Progress -->
+            <div class="bg-white card-custom p-4 border border-slate-200 flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-slate-500 font-bold">SOAL KUIS</span>
+                    <h3 class="text-lg font-bold text-slate-800"><span id="quizCurrentNum">1</span> dari 5</h3>
+                </div>
+                <!-- Progress Bar -->
+                <div class="w-1/2 bg-slate-100 h-3 rounded-full overflow-hidden">
+                    <div id="quizProgressBar" class="bg-rose-500 h-full w-1/5 transition-all duration-300"></div>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="bg-white card-custom p-6 border-2 border-rose-100 space-y-5">
+                <h3 id="quizQuestionText" class="text-base md:text-lg font-bold text-slate-800 leading-relaxed">
+                    Pertanyaan akan muncul di sini...
+                </h3>
+
+                <!-- Options List -->
+                <div id="quizOptionsContainer" class="space-y-3">
+                    <!-- Option items rendered by JS -->
+                </div>
+
+                <!-- Feedback Message -->
+                <div id="quizFeedback" class="hidden p-4 rounded-xl text-sm font-bold border">
+                    <!-- Feedback text -->
+                </div>
+
+                <!-- Next Button -->
+                <div class="flex justify-end pt-2">
+                    <button id="btnNextQuestion" onclick="nextQuizQuestion()" disabled
+                        class="bg-rose-500 disabled:opacity-50 hover:bg-rose-600 text-white font-bold py-2.5 px-6 rounded-xl text-sm btn-bounce shadow-md">
+                        Lanjut Soal Berikutnya ➔
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. HASIL BELAJAR PAGE -->
+        <section id="pageHasil" class="page-view hidden max-w-2xl mx-auto w-full space-y-6">
+            <div class="bg-white card-custom p-6 md:p-8 border-2 border-emerald-200 text-center space-y-6">
+                <div class="w-20 h-20 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mx-auto text-4xl shadow-inner">
+                    🥇
+                </div>
+
+                <div>
+                    <span class="text-xs uppercase tracking-wider font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                        Laporan Hasil Belajar
+                    </span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mt-2" id="resultStudentName">Nama Siswa</h2>
+                    <p class="text-sm text-slate-500" id="resultStudentClass">Kelas IV</p>
+                </div>
+
+                <!-- Score Big Box -->
+                <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200 max-w-xs mx-auto">
+                    <p class="text-xs text-slate-500 font-bold mb-1">SKOR AKHIR KUIS</p>
+                    <div id="resultScore" class="text-5xl font-bold text-emerald-600">0</div>
+                    <p id="resultBadge" class="text-xs font-bold text-emerald-800 mt-2 bg-emerald-100 py-1 px-3 rounded-lg inline-block">
+                        Hebat Sekali! 🎉
+                    </p>
+                </div>
+
+                <!-- Feedback Description -->
+                <p id="resultComment" class="text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
+                    Kamu telah menyelesaikan modul materi dan kuis simulasi wujud zat dengan sangat baik!
+                </p>
+
+                <!-- Actions -->
+                <div class="flex flex-wrap justify-center gap-3 pt-2">
+                    <button onclick="navigateTo('kuis')" class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 px-5 rounded-xl text-sm btn-bounce">
+                        🔄 Ulangi Kuis
+                    </button>
+                    <button onclick="navigateTo('dashboard')" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 px-5 rounded-xl text-sm btn-bounce">
+                        🏠 Ke Dashboard
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400">
+        <p>VLab Wujud Zat Kelas IV SD/MI &copy; Media Pembelajaran Sains Digital Interaktif</p>
+    </footer>
+
+    <script>
+        /* Global Application State */
+        let currentUser = { name: '', class: '' };
+        let quizScore = 0;
+        let currentQuestionIndex = 0;
+        let selectedOption = null;
+
+        // Quiz Questions Data
+        const quizData = [
+            {
+                question: "Benda yang memiliki bentuk dan volume yang selalu tetap adalah wujud zat...",
+                options: ["Padat", "Cair", "Gas", "Uap"],
+                answer: 0,
+                explanation: "Zat padat memiliki bentuk dan volume yang tetap karena molekulnya tersusun sangat rapat."
+            },
+            {
+                question: "Ketika es batu dipanaskan di atas kompor, es tersebut akan berubah menjadi air. Proses ini disebut...",
+                options: ["Membeku", "Mencair", "Menguap", "Mengembun"],
+                answer: 1,
+                explanation: "Mencair adalah perubahan wujud dari zat padat menjadi zat cair akibat menerima panas."
+            },
+            {
+                question: "Minyak goreng, susu cair, dan sirup adalah contoh dari benda berwujud...",
+                options: ["Gas", "Padat", "Cair", "Kristal"],
+                answer: 2,
+                explanation: "Minyak, susu, dan sirup mengalir dan bentuknya mengikuti wadah, sehingga termasuk zat cair."
+            },
+            {
+                question: "Perubahan wujud zat dari GAS menjadi CAIR disebut...",
+                options: ["Menguap", "Mengkristal", "Mengembun", "Menyublim"],
+                answer: 2,
+                explanation: "Mengembun terjadi saat uap panas didinginkan sehingga berubah menjadi titik-titik air cair."
+            },
+            {
+                question: "Balon udara dapat mengembang karena di dalamnya diisi oleh wujud zat...",
+                options: ["Padat", "Cair", "Gas", "Es"],
+                answer: 2,
+                explanation: "Udara di dalam balon adalah contoh zat gas yang mengisi seluruh ruangan balon."
+            }
+        ];
+
+        // Drag and Drop Game Data
+        const dragItemsData = [
+            { id: '1', name: 'Batu 🪨', category: 'padat' },
+            { id: '2', name: 'Air Minum 🥛', category: 'cair' },
+            { id: '3', name: 'Asap Knalpot 💨', category: 'gas' },
+            { id: '4', name: 'Pensil ✏️', category: 'padat' },
+            { id: '5', name: 'Minyak Goreng 🍾', category: 'cair' },
+            { id: '6', name: 'Udara Balon 🎈', category: 'gas' }
+        ];
+
+        // Web Audio API Synth Sound Generator
+        function playAudio(type) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (type === 'correct') {
+                    osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+                    osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1); // A5
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.3);
+                } else if (type === 'wrong') {
+                    osc.frequency.setValueAtTime(220, ctx.currentTime); // A3
+                    osc.frequency.setValueAtTime(164.81, ctx.currentTime + 0.1); // E3
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.3);
+                } else if (type === 'click') {
+                    osc.frequency.setValueAtTime(400, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.08);
+                }
+            } catch (e) {
+                // Fallback silenced if audio not allowed by browser
+            }
+        }
+
+        window.onload = function() {
+            checkSavedUser();
+            initDragGame();
+            updateVLab(0);
+        };
+
+        // Navigation Controller (SPA)
+        function navigateTo(pageId) {
+            playAudio('click');
+            const pages = document.querySelectorAll('.page-view');
+            pages.forEach(p => p.classList.add('hidden'));
+
+            const targetPage = document.getElementById('page' + pageId.charAt(0).toUpperCase() + pageId.slice(1));
+            if (targetPage) {
+                targetPage.classList.remove('hidden');
+            }
+
+            if (pageId === 'kuis') {
+                resetQuiz();
+            } else if (pageId === 'hasil') {
+                renderHasilPage();
+            }
+        }
+
+        // Login Handler & LocalStorage
+        function checkSavedUser() {
+            const saved = localStorage.getItem('vlab_student');
+            if (saved) {
+                currentUser = JSON.parse(saved);
+                updateUserUI();
+                navigateTo('dashboard');
+            } else {
+                navigateTo('login');
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const name = document.getElementById('inputName').value.trim();
+            const userClass = document.getElementById('inputClass').value;
+
+            if (!name) return;
+
+            currentUser = { name, class: userClass };
+            localStorage.setItem('vlab_student', JSON.stringify(currentUser));
+            updateUserUI();
+            navigateTo('dashboard');
+        }
+
+        function updateUserUI() {
+            document.getElementById('userInfoHeader').classList.remove('hidden');
+            document.getElementById('headerStudentName').innerText = currentUser.name;
+            document.getElementById('headerStudentClass').innerText = currentUser.class;
+            document.getElementById('dashStudentName').innerText = currentUser.name;
+
+            const savedScore = localStorage.getItem('vlab_quiz_score');
+            if (savedScore !== null) {
+                document.getElementById('dashQuizScore').innerText = savedScore + ' / 100';
+            }
+        }
+
+        function logout() {
+            playAudio('click');
+            localStorage.removeItem('vlab_student');
+            localStorage.removeItem('vlab_quiz_score');
+            document.getElementById('userInfoHeader').classList.add('hidden');
+            document.getElementById('inputName').value = '';
+            navigateTo('login');
+        }
+
+        // Game Drag & Drop Logic
+        function initDragGame() {
+            const container = document.getElementById('dragItemsContainer');
+            const zonePadat = document.getElementById('zone-padat');
+            const zoneCair = document.getElementById('zone-cair');
+            const zoneGas = document.getElementById('zone-gas');
+
+            container.innerHTML = '';
+            zonePadat.innerHTML = '';
+            zoneCair.innerHTML = '';
+            zoneGas.innerHTML = '';
+
+            // Shuffle array
+            const shuffled = [...dragItemsData].sort(() => Math.random() - 0.5);
+
+            shuffled.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'bg-white border-2 border-slate-200 shadow-sm py-2 px-3 rounded-xl cursor-grab font-bold text-xs text-slate-700 flex items-center gap-1 select-none hover:border-amber-400';
+                el.draggable = true;
+                el.id = 'drag-item-' + item.id;
+                el.innerText = item.name;
+                el.setAttribute('data-category', item.category);
+
+                // Drag Events
+                el.ondragstart = (e) => {
+                    e.dataTransfer.setData('text/plain', item.id);
+                };
+
+                // Touch / Click fallback for mobile friendliness
+                el.onclick = () => quickAssignItem(item);
+
+                container.appendChild(el);
+            });
+        }
+
+        function allowDrop(e) {
+            e.preventDefault();
+        }
+
+        function handleDrop(e, targetCategory) {
+            e.preventDefault();
+            const id = e.dataTransfer.getData('text/plain');
+            const itemEl = document.getElementById('drag-item-' + id);
+            if (itemEl) {
+                const targetZone = document.getElementById('zone-' + targetCategory);
+                targetZone.appendChild(itemEl);
+                playAudio('click');
+            }
+        }
+
+        function quickAssignItem(item) {
+            const itemEl = document.getElementById('drag-item-' + item.id);
+            if (!itemEl) return;
+
+            // Cycle between zones
+            const parent = itemEl.parentElement.id;
+            if (parent === 'dragItemsContainer') {
+                document.getElementById('zone-padat').appendChild(itemEl);
+            } else if (parent === 'zone-padat') {
+                document.getElementById('zone-cair').appendChild(itemEl);
+            } else if (parent === 'zone-cair') {
+                document.getElementById('zone-gas').appendChild(itemEl);
+            } else {
+                document.getElementById('dragItemsContainer').appendChild(itemEl);
+            }
+            playAudio('click');
+        }
+
+        function checkDragGameResult() {
+            let correctCount = 0;
+            let total = dragItemsData.length;
+
+            dragItemsData.forEach(item => {
+                const itemEl = document.getElementById('drag-item-' + item.id);
+                if (itemEl) {
+                    const parentZone = itemEl.parentElement.id;
+                    if (parentZone === 'zone-' + item.category) {
+                        correctCount++;
+                        itemEl.classList.add('border-emerald-500', 'bg-emerald-50');
+                        itemEl.classList.remove('border-rose-500', 'bg-rose-50');
+                    } else {
+                        itemEl.classList.add('border-rose-500', 'bg-rose-50');
+                        itemEl.classList.remove('border-emerald-500', 'bg-emerald-50');
+                    }
+                }
+            });
+
+            if (correctCount === total) {
+                playAudio('correct');
+                confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+                alert(`Luar Biasa! 🎉 Semua ${total} benda berhasil dikelompokkan dengan benar!`);
+            } else {
+                playAudio('wrong');
+                alert(`Kamu berhasil memasangkan ${correctCount} dari ${total} benda. Coba periksa item yang berwarna merah!`);
+            }
+        }
+
+        function resetDragGame() {
+            playAudio('click');
+            initDragGame();
+        }
+
+        // VLab Simulation Logic
+        function setVLabTemp(val) {
+            document.getElementById('tempSlider').value = val;
+            updateVLab(val);
+        }
+
+        function updateVLab(tempVal) {
+            const temp = parseInt(tempVal);
+            document.getElementById('tempDisplay').innerText = temp + ' °C';
+
+            const objectContainer = document.getElementById('vlabObject');
+            const moleculeBox = document.getElementById('moleculeBox');
+            const moleculeDesc = document.getElementById('moleculeDesc');
+            const statusText = document.getElementById('vlabStatusText');
+            const processText = document.getElementById('vlabProcessText');
+            const explanation = document.getElementById('vlabExplanation');
+            const heatEffect = document.getElementById('heatEffect');
+            const coldEffect = document.getElementById('coldEffect');
+
+            // Reset effects
+            heatEffect.style.opacity = '0';
+            coldEffect.style.opacity = '0';
+
+            if (temp <= 0) {
+                // PADAT (Es Batu)
+                coldEffect.style.opacity = Math.abs(temp) / 10;
+                objectContainer.innerHTML = `
+                    <div class="w-32 h-28 bg-sky-200/90 rounded-2xl border-4 border-sky-300 shadow-lg flex items-center justify-center text-5xl backdrop-blur-sm animate-pulse">
+                        🧊
+                    </div>
+                `;
+                statusText.innerText = "PADAT (Es Batu)";
+                statusText.className = "font-bold text-blue-600";
+                processText.innerText = temp < 0 ? "Proses Membeku (Pendinginan)" : "Titik Beku Air";
+                explanation.innerText = "Pada suhu ≤ 0°C, air berubah wujud menjadi es padat. Bentuknya tetap dan molekulnya terikat sangat kuat.";
+                
+                // Molecule visualization
+                moleculeDesc.innerText = "Molekul PADAT: Sangat rapat, beraturan, & bergetar di tempat.";
+                renderMolecules(moleculeBox, 'solid');
+
+            } else if (temp > 0 && temp < 100) {
+                // CAIR (Air)
+                objectContainer.innerHTML = `
+                    <div class="w-56 h-20 bg-blue-400/70 rounded-b-2xl border-b-2 border-blue-500 flex items-center justify-center text-4xl animate-liquid">
+                        💧
+                    </div>
+                `;
+                statusText.innerText = "CAIR (Air)";
+                statusText.className = "font-bold text-sky-600";
+                processText.innerText = "Mencair / Wujud Cair";
+                explanation.innerText = "Antara suhu 1°C - 99°C, es meleleh menjadi cair. Air mengalir dan bentuknya mengikuti wadah beaker.";
+                
+                // Molecule visualization
+                moleculeDesc.innerText = "Molekul CAIR: Renggang & bergerak bebas mengalir.";
+                renderMolecules(moleculeBox, 'liquid');
+
+            } else {
+                // GAS (Uap Air)
+                heatEffect.style.opacity = (temp - 90) / 20;
+                objectContainer.innerHTML = `
+                    <div class="w-full flex flex-col items-center gap-2 animate-gas">
+                        <span class="text-5xl opacity-80">♨️</span>
+                        <span class="text-4xl opacity-60">💨</span>
+                    </div>
+                `;
+                statusText.innerText = "GAS (Uap Air)";
+                statusText.className = "font-bold text-purple-600";
+                processText.innerText = "Proses Menguap (Pemanasan Tinggi)";
+                explanation.innerText = "Pada suhu ≥ 100°C, air mendidih dan menguap menjadi gas. Molekulnya bergerak sangat cepat dan lepas ke udara.";
+                
+                // Molecule visualization
+                moleculeDesc.innerText = "Molekul GAS: Sangat berjauhan & bergerak cepat ke segala arah.";
+                renderMolecules(moleculeBox, 'gas');
+            }
+        }
+
+        function renderMolecules(container, type) {
+            container.innerHTML = '';
+            const count = 12;
+
+            for (let i = 0; i < count; i++) {
+                const m = document.createElement('div');
+                m.className = 'w-4 h-4 bg-sky-400 rounded-full shadow-sm';
+
+                if (type === 'solid') {
+                    m.classList.add('animate-solid');
+                } else if (type === 'liquid') {
+                    m.classList.add('animate-liquid');
+                } else if (type === 'gas') {
+                    m.classList.add('animate-gas');
+                    m.style.animationDuration = (0.5 + Math.random()) + 's';
+                }
+                container.appendChild(m);
+            }
+        }
+
+        // Quiz Engine Logic
+        function resetQuiz() {
+            quizScore = 0;
+            currentQuestionIndex = 0;
+            selectedOption = null;
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = quizData[currentQuestionIndex];
+            document.getElementById('quizCurrentNum').innerText = currentQuestionIndex + 1;
+            document.getElementById('quizQuestionText').innerText = q.question;
+
+            // Update Progress Bar
+            const progress = ((currentQuestionIndex + 1) / quizData.length) * 100;
+            document.getElementById('quizProgressBar').style.width = progress + '%';
+
+            // Options
+            const container = document.getElementById('quizOptionsContainer');
+            container.innerHTML = '';
+
+            document.getElementById('quizFeedback').classList.add('hidden');
+            document.getElementById('btnNextQuestion').disabled = true;
+            selectedOption = null;
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left p-4 rounded-xl border-2 border-slate-200 hover:border-rose-400 font-semibold text-slate-700 transition flex items-center justify-between text-sm md:text-base';
+                btn.innerHTML = `<span>${String.fromCharCode(65 + idx)}. ${opt}</span>`;
+                btn.onclick = () => selectQuizAnswer(idx, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectQuizAnswer(optIndex, btnEl) {
+            if (selectedOption !== null) return; // Prevent re-selecting
+
+            selectedOption = optIndex;
+            const q = quizData[currentQuestionIndex];
+            const isCorrect = optIndex === q.answer;
+
+            const feedback = document.getElementById('quizFeedback');
+            feedback.classList.remove('hidden');
+
+            if (isCorrect) {
+                playAudio('correct');
+                quizScore += 20;
+                btnEl.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-800');
+                feedback.className = 'p-4 rounded-xl text-sm font-bold border border-emerald-200 bg-emerald-50 text-emerald-800';
+                feedback.innerHTML = `✅ Benar sekali! ${q.explanation}`;
+            } else {
+                playAudio('wrong');
+                btnEl.classList.add('border-rose-500', 'bg-rose-50', 'text-rose-800');
+                feedback.className = 'p-4 rounded-xl text-sm font-bold border border-rose-200 bg-rose-50 text-rose-800';
+                feedback.innerHTML = `❌ Kurang tepat. Jawaban benar: <strong>${q.options[q.answer]}</strong>. ${q.explanation}`;
+            }
+
+            document.getElementById('btnNextQuestion').disabled = false;
+        }
+
+        function nextQuizQuestion() {
+            playAudio('click');
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                renderQuestion();
+            } else {
+                // Save final score
+                localStorage.setItem('vlab_quiz_score', quizScore);
+                updateUserUI();
+                navigateTo('hasil');
+            }
+        }
+
+        // Result Page Renderer
+        function renderHasilPage() {
+            document.getElementById('resultStudentName').innerText = currentUser.name || "Siswa";
+            document.getElementById('resultStudentClass').innerText = currentUser.class || "Kelas IV";
+            document.getElementById('resultScore').innerText = quizScore;
+
+            const badge = document.getElementById('resultBadge');
+            const comment = document.getElementById('resultComment');
+
+            if (quizScore >= 80) {
+                badge.innerText = "🏆 Ahli Sains Wujud Zat!";
+                badge.className = "text-xs font-bold text-amber-800 bg-amber-100 py-1 px-3 rounded-lg inline-block";
+                comment.innerText = "Sangat Luar Biasa! Kamu sudah menguasai seluruh wujud zat, sifat partikel, dan perubahannya di Laboratorium Virtual!";
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            } else if (quizScore >= 60) {
+                badge.innerText = "🌟 Peneliti Muda Hebat!";
+                badge.className = "text-xs font-bold text-emerald-800 bg-emerald-100 py-1 px-3 rounded-lg inline-block";
+                comment.innerText = "Bagus sekali! Kamu sudah memahami sebagian besar materi wujud zat. Ayo baca modul sekali lagi untuk nilai sempurna!";
+            } else {
+                badge.innerText = "👍 Tetap Semangat Belajar!";
+                badge.className = "text-xs font-bold text-sky-800 bg-sky-100 py-1 px-3 rounded-lg inline-block";
+                comment.innerText = "Jangan berkecil hati! Coba ulangi eksperimen simulasi di VLab dan kerjakan kuisnya kembali ya!";
+            }
+        }
+    </script>
+</body>
+</html>
